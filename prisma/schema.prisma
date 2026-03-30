@@ -1,0 +1,181 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum CampaignStatus {
+  DRAFT
+  READY
+  ARCHIVED
+}
+
+enum ScriptStatus {
+  DRAFT
+  GENERATED
+  FAILED
+}
+
+enum FrameObjective {
+  HOOK
+  BENEFICIO
+  CTA
+}
+
+enum FrameStatus {
+  PENDING
+  PROCESSING
+  GENERATED
+  FAILED
+}
+
+enum VideoAssemblyStatus {
+  PENDING
+  PROCESSING
+  GENERATED
+  FAILED
+}
+
+enum PublicationStatus {
+  PENDING
+  READY_TO_PUBLISH
+  PROCESSING
+  PUBLISHED
+  FAILED
+}
+
+model User {
+  id         String     @id @db.Uuid
+  email      String     @unique
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  campaigns  Campaign[]
+}
+
+model Campaign {
+  id              String         @id @default(cuid())
+  userId          String         @db.Uuid
+  nomeProduto     String
+  tipoProduto     String         @default("geral")
+  descricaoProduto String
+  nicho           String
+  idioma          String
+  ctaPreferido    String
+  estiloVisual    String
+  campaignTone    String         @default("Persuasivo direto")
+  sceneDirection  String         @default("Narrativa comercial unica do inicio ao fim")
+  imageStoragePath String?
+  imagePublicUrl  String?
+  imageFileName   String?
+  imageMimeType   String?
+  baseImageStatus      FrameStatus @default(PENDING)
+  baseImageStoragePath String?
+  baseImagePublicUrl   String?
+  baseImageProvider    String?
+  baseImageExternalJobId String?
+  baseImageError       String?
+  status          CampaignStatus @default(DRAFT)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scripts VideoScript[]
+
+  @@index([userId])
+}
+
+model VideoScript {
+  id          String       @id @default(cuid())
+  campaignId  String
+  titulo      String
+  idioma      String
+  legendaFinal String?
+  marketingScript String?
+  visualStyle    String?
+  campaignTone   String?
+  sceneDirection String?
+  hashtags    String[]
+  status      ScriptStatus @default(DRAFT)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  campaign      Campaign           @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  frames        ScriptFrame[]
+  generatedVideo GeneratedVideo?
+
+  @@index([campaignId])
+}
+
+model ScriptFrame {
+  id              String         @id @default(cuid())
+  scriptId         String
+  ordem            Int
+  objetivo         FrameObjective
+  fala             String
+  promptVideo      String
+  duracaoSegundos  Int
+  status           FrameStatus    @default(PENDING)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  script         VideoScript      @relation(fields: [scriptId], references: [id], onDelete: Cascade)
+  generatedFrame GeneratedFrame?
+
+  @@unique([scriptId, ordem])
+  @@index([scriptId])
+}
+
+model GeneratedFrame {
+  id             String      @id @default(cuid())
+  scriptFrameId  String      @unique
+  provider       String
+  externalJobId  String?
+  promptEnviado  String
+  status         FrameStatus @default(PENDING)
+  storagePath    String?
+  publicUrl      String?
+  duracaoGerada  Int?
+  erro           String?
+  tentativas     Int         @default(0)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  scriptFrame ScriptFrame @relation(fields: [scriptFrameId], references: [id], onDelete: Cascade)
+}
+
+model GeneratedVideo {
+  id            String              @id @default(cuid())
+  scriptId       String              @unique
+  statusMontagem VideoAssemblyStatus @default(PENDING)
+  storagePath    String?
+  publicUrl      String?
+  thumbnailPath  String?
+  thumbnailUrl   String?
+  duracaoTotal   Int?
+  erro           String?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  script        VideoScript         @relation(fields: [scriptId], references: [id], onDelete: Cascade)
+  publication   TikTokPublication?
+}
+
+model TikTokPublication {
+  id                 String             @id @default(cuid())
+  generatedVideoId   String             @unique
+  legendaPublicacao  String
+  hashtagsPublicacao String[]
+  providerPostId     String?
+  creatorTikTokId    String?
+  status             PublicationStatus  @default(PENDING)
+  modoVisibilidade   String             @default("PRIVATE")
+  erro               String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  generatedVideo GeneratedVideo @relation(fields: [generatedVideoId], references: [id], onDelete: Cascade)
+}
+
