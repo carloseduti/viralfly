@@ -229,9 +229,9 @@ Configuracao recomendada para este projeto:
 
 Observacoes:
 - O arquivo `vercel.json` ja define `maxDuration` para as APIs.
-- O build da Vercel executa `prisma migrate deploy` automaticamente antes do `next build`.
+- O build da Vercel executa `prisma generate` e `next build` (sem rodar migracao automaticamente).
 - Prisma Client e gerado no `postinstall`.
-- Migracoes devem ser executadas no banco alvo com `prisma migrate deploy` no seu fluxo de release.
+- Execute migracoes separadamente no banco alvo com `npm run migrate:deploy` em ambiente com acesso ao Postgres.
 
 Coberturas principais:
 - estrutura obrigatória de 3 frames
