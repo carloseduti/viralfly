@@ -1,7 +1,8 @@
-import { CampaignForm } from '@/components/campaign-form';
-import { requireAuthenticatedUser } from '@/server/auth/require-authenticated-user';
+﻿import { CampaignForm } from '@/components/campaign-form';
+import { requirePageAuthenticatedUser } from '@/server/auth/require-page-authenticated-user';
 
 export default async function NewCampaignPage() {
-  await requireAuthenticatedUser();
+  await requirePageAuthenticatedUser();
   return <CampaignForm mode="create" />;
 }
+

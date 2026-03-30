@@ -1,11 +1,11 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
 
 import { StatusBadge } from '@/components/status-badge';
 import { prisma } from '@/lib/prisma';
-import { requireAuthenticatedUser } from '@/server/auth/require-authenticated-user';
+import { requirePageAuthenticatedUser } from '@/server/auth/require-page-authenticated-user';
 
 export default async function DashboardPage() {
-  const user = await requireAuthenticatedUser();
+  const user = await requirePageAuthenticatedUser();
 
   const [campaignCount, scriptCount, frameCount, videoCount, publicationCount, latestCampaigns] = await Promise.all([
     prisma.campaign.count({ where: { userId: user.id } }),
@@ -96,3 +96,4 @@ function Metric({ title, value }: { title: string; value: number }) {
     </div>
   );
 }
+

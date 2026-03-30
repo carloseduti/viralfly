@@ -1,13 +1,13 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
 
 import { StatusBadge } from '@/components/status-badge';
-import { requireAuthenticatedUser } from '@/server/auth/require-authenticated-user';
+import { requirePageAuthenticatedUser } from '@/server/auth/require-page-authenticated-user';
 import { CampaignService } from '@/server/modules/campaigns/campaign.service';
 
 const campaignService = new CampaignService();
 
 export default async function CampaignsPage() {
-  const user = await requireAuthenticatedUser();
+  const user = await requirePageAuthenticatedUser();
   const campaigns = await campaignService.listCampaigns(user.id);
 
   return (
@@ -56,3 +56,4 @@ export default async function CampaignsPage() {
     </div>
   );
 }
+

@@ -1,12 +1,12 @@
-import { ActionButton } from '@/components/action-button';
+﻿import { ActionButton } from '@/components/action-button';
 import { StatusBadge } from '@/components/status-badge';
-import { requireAuthenticatedUser } from '@/server/auth/require-authenticated-user';
+import { requirePageAuthenticatedUser } from '@/server/auth/require-page-authenticated-user';
 import { PublicationService } from '@/server/modules/publications/publication.service';
 
 const publicationService = new PublicationService();
 
 export default async function PublicationDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const user = await requireAuthenticatedUser();
+  const user = await requirePageAuthenticatedUser();
   const { id } = await params;
   const publication = await publicationService.getPublicationById(user.id, id);
 
@@ -59,3 +59,4 @@ export default async function PublicationDetailPage({ params }: { params: Promis
     </div>
   );
 }
+

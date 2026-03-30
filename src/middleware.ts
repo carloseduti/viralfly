@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 
 import { env } from '@/lib/env';
 import { isLoginPath, isPrivatePath } from '@/server/auth/route-access';
+import { isAuthSessionMissingMessage } from '@/server/auth/supabase-auth-error';
 
 type SupabaseCookie = {
   name: string;
@@ -39,12 +40,14 @@ export async function middleware(request: NextRequest) {
 
     if (!error) {
       user = authUser;
-    } else {
+    } else if (!isAuthSessionMissingMessage(error.message)) {
       console.error('Falha ao validar sessao no middleware:', error.message);
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : 'erro desconhecido';
-    console.error('Erro ao consultar usuario no middleware:', message);
+    if (!isAuthSessionMissingMessage(message)) {
+      console.error('Erro ao consultar usuario no middleware:', message);
+    }
   }
 
   const pathname = request.nextUrl.pathname;
@@ -53,18 +56,26 @@ export async function middleware(request: NextRequest) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = '/login';
     redirectUrl.searchParams.set('next', pathname);
-    return NextResponse.redirect(redirectUrl);
+    const redirectResponse = NextResponse.redirect(redirectUrl);
+    response.cookies.getAll().forEach((cookie) => {
+      redirectResponse.cookies.set(cookie);
+    });
+    return redirectResponse;
   }
 
   if (isLoginPath(pathname) && user) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = '/dashboard';
-    return NextResponse.redirect(redirectUrl);
+    const redirectResponse = NextResponse.redirect(redirectUrl);
+    response.cookies.getAll().forEach((cookie) => {
+      redirectResponse.cookies.set(cookie);
+    });
+    return redirectResponse;
   }
 
   return response;
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)']
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)']
 };

@@ -1,14 +1,14 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
 
 import { ActionButton } from '@/components/action-button';
 import { StatusBadge } from '@/components/status-badge';
-import { requireAuthenticatedUser } from '@/server/auth/require-authenticated-user';
+import { requirePageAuthenticatedUser } from '@/server/auth/require-page-authenticated-user';
 import { CampaignService } from '@/server/modules/campaigns/campaign.service';
 
 const campaignService = new CampaignService();
 
 export default async function CampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const user = await requireAuthenticatedUser();
+  const user = await requirePageAuthenticatedUser();
   const { id } = await params;
   const campaign = await campaignService.getCampaignById(user.id, id);
 
@@ -204,3 +204,4 @@ function InfoItem({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+

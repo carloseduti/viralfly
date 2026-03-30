@@ -1,12 +1,12 @@
-import { ActionButton } from '@/components/action-button';
+﻿import { ActionButton } from '@/components/action-button';
 import { StatusBadge } from '@/components/status-badge';
-import { requireAuthenticatedUser } from '@/server/auth/require-authenticated-user';
+import { requirePageAuthenticatedUser } from '@/server/auth/require-page-authenticated-user';
 import { ScriptService } from '@/server/modules/scripts/script.service';
 
 const scriptService = new ScriptService();
 
 export default async function ScriptDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const user = await requireAuthenticatedUser();
+  const user = await requirePageAuthenticatedUser();
   const { id } = await params;
   const script = await scriptService.getScriptById(user.id, id);
 
@@ -117,3 +117,4 @@ export default async function ScriptDetailPage({ params }: { params: Promise<{ i
     </div>
   );
 }
+

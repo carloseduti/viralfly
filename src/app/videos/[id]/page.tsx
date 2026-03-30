@@ -1,14 +1,14 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
 
 import { ActionButton } from '@/components/action-button';
 import { StatusBadge } from '@/components/status-badge';
-import { requireAuthenticatedUser } from '@/server/auth/require-authenticated-user';
+import { requirePageAuthenticatedUser } from '@/server/auth/require-page-authenticated-user';
 import { VideoAssemblyService } from '@/server/modules/videos/video-assembly.service';
 
 const videoService = new VideoAssemblyService();
 
 export default async function VideoDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const user = await requireAuthenticatedUser();
+  const user = await requirePageAuthenticatedUser();
   const { id } = await params;
   const video = await videoService.getVideoById(user.id, id);
 
@@ -69,7 +69,7 @@ export default async function VideoDetailPage({ params }: { params: Promise<{ id
 
           <div className="card space-y-2 text-sm text-slate-700">
             <h2 className="section-title">Status tecnico</h2>
-            <p>Duração estimada: {video.duracaoTotal ?? 0}s</p>
+            <p>DuraÃ§Ã£o estimada: {video.duracaoTotal ?? 0}s</p>
             <p>Public URL: {video.publicUrl ?? 'indisponivel'}</p>
             <p>Thumbnail: {video.thumbnailUrl ?? 'indisponivel'}</p>
           </div>
@@ -90,3 +90,4 @@ export default async function VideoDetailPage({ params }: { params: Promise<{ id
     </div>
   );
 }
+

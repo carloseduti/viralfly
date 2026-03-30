@@ -5,7 +5,7 @@ import { Space_Grotesk, Source_Sans_3 } from 'next/font/google';
 import '@/app/globals.css';
 import { LogoutButton } from '@/components/logout-button';
 import { ToastCenter } from '@/components/toast-center';
-import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { getOptionalAuthenticatedUser } from '@/server/auth/require-authenticated-user';
 
 const headingFont = Space_Grotesk({
   variable: '--font-heading',
@@ -29,23 +29,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  let user: { id: string } | null = null;
-  try {
-    const supabase = await createServerSupabaseClient();
-    const {
-      data: { user: authUser },
-      error
-    } = await supabase.auth.getUser();
-
-    if (!error) {
-      user = authUser;
-    } else {
-      console.error('Falha ao validar sessao no layout:', error.message);
-    }
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'erro desconhecido';
-    console.error('Erro ao consultar usuario no layout:', message);
-  }
+  const user = await getOptionalAuthenticatedUser();
 
   return (
     <html lang="pt-BR">
