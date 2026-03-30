@@ -71,6 +71,8 @@ export const env = {
   NEXT_PUBLIC_SUPABASE_ANON_KEY: nextPublicAnonKey
 };
 
+const databaseUrlValidationError = validateDatabaseUrl(env.DATABASE_URL);
+
 if (isVercel) {
   const fieldErrors: Record<string, string[]> = {};
 
@@ -88,9 +90,44 @@ if (isVercel) {
     ];
   }
 
+  if (databaseUrlValidationError) {
+    fieldErrors.DATABASE_URL = [...(fieldErrors.DATABASE_URL ?? []), databaseUrlValidationError];
+  }
+
   if (Object.keys(fieldErrors).length > 0) {
     console.error('Variaveis obrigatorias ausentes/invalidas para Vercel', fieldErrors);
     throw new Error('Configuracao invalida de ambiente para Vercel.');
   }
+}
+
+function validateDatabaseUrl(databaseUrl: string) {
+  let parsed: URL;
+  try {
+    parsed = new URL(databaseUrl);
+  } catch {
+    return 'DATABASE_URL invalida: formato de URL nao reconhecido.';
+  }
+
+  const host = parsed.hostname.toLowerCase();
+  const username = decodeURIComponent(parsed.username || '');
+
+  const schemeIndex = databaseUrl.indexOf('://');
+  const lastAtIndex = databaseUrl.lastIndexOf('@');
+  if (schemeIndex > -1 && lastAtIndex > schemeIndex + 3) {
+    const authSection = databaseUrl.slice(schemeIndex + 3, lastAtIndex);
+    if (authSection.includes('@')) {
+      return 'DATABASE_URL invalida: senha parece conter "@" sem URL encoding. Use encode de caracteres especiais (%40, %24, %2F etc).';
+    }
+  }
+
+  if (host.endsWith('.pooler.supabase.com') && !username.includes('.')) {
+    return 'DATABASE_URL invalida para Supabase pooler: usuario deve incluir project ref (ex: postgres.<project-ref>).';
+  }
+
+  if (/^db\.[a-z0-9]+\.supabase\.co$/.test(host) && username.includes('.')) {
+    return 'DATABASE_URL invalida para host db.<project-ref>.supabase.co: usuario deve ser apenas postgres (sem sufixo do project ref).';
+  }
+
+  return null;
 }
 
