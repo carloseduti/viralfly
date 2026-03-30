@@ -1,11 +1,14 @@
 import { spawn } from 'node:child_process';
+import ffmpegStatic from 'ffmpeg-static';
 
 import { env } from '@/lib/env';
 
 export class FfmpegExecutor {
   run(args: string[]) {
+    const ffmpegBinary = env.FFMPEG_PATH ?? ffmpegStatic ?? 'ffmpeg';
+
     return new Promise<void>((resolve, reject) => {
-      const ffmpegProcess = spawn(env.FFMPEG_PATH, args, {
+      const ffmpegProcess = spawn(ffmpegBinary, args, {
         stdio: ['ignore', 'pipe', 'pipe']
       });
 
@@ -15,7 +18,7 @@ export class FfmpegExecutor {
       });
 
       ffmpegProcess.on('error', (err) => {
-        reject(new Error(`Falha ao iniciar ffmpeg: ${err.message}`));
+        reject(new Error(`Falha ao iniciar ffmpeg (${ffmpegBinary}): ${err.message}`));
       });
 
       ffmpegProcess.on('close', (code) => {

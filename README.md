@@ -211,6 +211,23 @@ DISABLE_QUEUES=true npm run dev
 npm run test
 ```
 
+## Deploy na Vercel
+
+Configuracao recomendada para este projeto:
+
+1. Conecte o repositÃ³rio na Vercel (framework `Next.js`).
+2. Defina as variÃ¡veis de ambiente do `.env.example`.
+3. Em Vercel, configure `DISABLE_QUEUES=true` (workers BullMQ nao rodam como processo dedicado em serverless).
+4. Configure callbacks com o dominio publicado:
+   - `NANO_BANANA_CALLBACK_URL=https://SEU_APP.vercel.app/api/integrations/nano-banana/callback`
+   - `KIE_AI_CALLBACK_URL=https://SEU_APP.vercel.app/api/integrations/kie-ai/callback`
+5. Mantenha `FFMPEG_PATH` vazio para usar `ffmpeg-static` automaticamente.
+
+Observacoes:
+- O arquivo `vercel.json` ja define `maxDuration` para as APIs.
+- Prisma Client e gerado no `postinstall`.
+- Migracoes devem ser executadas no banco alvo com `prisma migrate deploy` no seu fluxo de release.
+
 Coberturas principais:
 - estrutura obrigatória de 3 frames
 - ordem 1,2,3
