@@ -29,10 +29,23 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
+  let user: { id: string } | null = null;
+  try {
+    const supabase = await createServerSupabaseClient();
+    const {
+      data: { user: authUser },
+      error
+    } = await supabase.auth.getUser();
+
+    if (!error) {
+      user = authUser;
+    } else {
+      console.error('Falha ao validar sessao no layout:', error.message);
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'erro desconhecido';
+    console.error('Erro ao consultar usuario no layout:', message);
+  }
 
   return (
     <html lang="pt-BR">

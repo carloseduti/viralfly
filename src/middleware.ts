@@ -30,9 +30,22 @@ export async function middleware(request: NextRequest) {
     }
   });
 
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
+  let user: { id: string } | null = null;
+  try {
+    const {
+      data: { user: authUser },
+      error
+    } = await supabase.auth.getUser();
+
+    if (!error) {
+      user = authUser;
+    } else {
+      console.error('Falha ao validar sessao no middleware:', error.message);
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'erro desconhecido';
+    console.error('Erro ao consultar usuario no middleware:', message);
+  }
 
   const pathname = request.nextUrl.pathname;
 
