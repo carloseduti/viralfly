@@ -1,6 +1,6 @@
 ﻿import { ActionButton } from '@/components/action-button';
 import { StatusBadge } from '@/components/status-badge';
-import { requirePageAuthenticatedUser } from '@/server/auth/require-page-authenticated-user';
+import { requirePageAuthenticatedUser } from '@/server/auth/require-authenticated-user';
 import { PublicationService } from '@/server/modules/publications/publication.service';
 
 const publicationService = new PublicationService();
@@ -59,4 +59,5 @@ export default async function PublicationDetailPage({ params }: { params: Promis
     </div>
   );
 }
+
 

@@ -1,6 +1,6 @@
 ﻿import { ActionButton } from '@/components/action-button';
 import { StatusBadge } from '@/components/status-badge';
-import { requirePageAuthenticatedUser } from '@/server/auth/require-page-authenticated-user';
+import { requirePageAuthenticatedUser } from '@/server/auth/require-authenticated-user';
 import { ScriptService } from '@/server/modules/scripts/script.service';
 
 const scriptService = new ScriptService();
@@ -117,4 +117,5 @@ export default async function ScriptDetailPage({ params }: { params: Promise<{ i
     </div>
   );
 }
+
 

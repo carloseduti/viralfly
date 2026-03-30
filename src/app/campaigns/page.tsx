@@ -1,7 +1,7 @@
 ﻿import Link from 'next/link';
 
 import { StatusBadge } from '@/components/status-badge';
-import { requirePageAuthenticatedUser } from '@/server/auth/require-page-authenticated-user';
+import { requirePageAuthenticatedUser } from '@/server/auth/require-authenticated-user';
 import { CampaignService } from '@/server/modules/campaigns/campaign.service';
 
 const campaignService = new CampaignService();
@@ -56,4 +56,5 @@ export default async function CampaignsPage() {
     </div>
   );
 }
+
 

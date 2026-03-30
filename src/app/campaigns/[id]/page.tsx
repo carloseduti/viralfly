@@ -2,7 +2,7 @@
 
 import { ActionButton } from '@/components/action-button';
 import { StatusBadge } from '@/components/status-badge';
-import { requirePageAuthenticatedUser } from '@/server/auth/require-page-authenticated-user';
+import { requirePageAuthenticatedUser } from '@/server/auth/require-authenticated-user';
 import { CampaignService } from '@/server/modules/campaigns/campaign.service';
 
 const campaignService = new CampaignService();
@@ -204,4 +204,5 @@ function InfoItem({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+
 

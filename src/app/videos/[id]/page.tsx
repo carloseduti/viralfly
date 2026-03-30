@@ -2,7 +2,7 @@
 
 import { ActionButton } from '@/components/action-button';
 import { StatusBadge } from '@/components/status-badge';
-import { requirePageAuthenticatedUser } from '@/server/auth/require-page-authenticated-user';
+import { requirePageAuthenticatedUser } from '@/server/auth/require-authenticated-user';
 import { VideoAssemblyService } from '@/server/modules/videos/video-assembly.service';
 
 const videoService = new VideoAssemblyService();
@@ -90,4 +90,5 @@ export default async function VideoDetailPage({ params }: { params: Promise<{ id
     </div>
   );
 }
+
 

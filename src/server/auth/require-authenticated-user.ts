@@ -1,4 +1,5 @@
 import { User as SupabaseUser } from '@supabase/supabase-js';
+import { redirect } from 'next/navigation';
 
 import { prisma } from '@/lib/prisma';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
@@ -43,6 +44,16 @@ export async function requireAuthenticatedUser(): Promise<SupabaseUser> {
   const user = await getOptionalAuthenticatedUser();
   if (!user) {
     throw new AppError('Usuario nao autenticado', 401);
+  }
+
+  await syncAuthenticatedUser(user);
+  return user;
+}
+
+export async function requirePageAuthenticatedUser(): Promise<SupabaseUser> {
+  const user = await getOptionalAuthenticatedUser();
+  if (!user) {
+    redirect('/login');
   }
 
   await syncAuthenticatedUser(user);

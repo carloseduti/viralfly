@@ -2,7 +2,7 @@
 
 import { StatusBadge } from '@/components/status-badge';
 import { prisma } from '@/lib/prisma';
-import { requirePageAuthenticatedUser } from '@/server/auth/require-page-authenticated-user';
+import { requirePageAuthenticatedUser } from '@/server/auth/require-authenticated-user';
 
 export default async function DashboardPage() {
   const user = await requirePageAuthenticatedUser();
@@ -96,4 +96,5 @@ function Metric({ title, value }: { title: string; value: number }) {
     </div>
   );
 }
+
 
