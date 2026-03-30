@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
 import { env } from '@/lib/env';
+import { authDebug } from '@/server/auth/auth-observability';
 
 type SupabaseCookie = {
   name: string;
@@ -10,9 +11,10 @@ type SupabaseCookie = {
 };
 
 export async function createServerSupabaseClient() {
+  authDebug('create-server-supabase-client:start');
   const cookieStore = await cookies();
 
-  return createServerClient(env.NEXT_PUBLIC_SUPABASE_URL, env.NEXT_PUBLIC_SUPABASE_ANON_KEY, {
+  const client = createServerClient(env.NEXT_PUBLIC_SUPABASE_URL, env.NEXT_PUBLIC_SUPABASE_ANON_KEY, {
     cookies: {
       getAll() {
         return cookieStore.getAll();
@@ -27,5 +29,8 @@ export async function createServerSupabaseClient() {
       }
     }
   });
+
+  authDebug('create-server-supabase-client:done');
+  return client;
 }
 

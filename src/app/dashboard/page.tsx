@@ -2,23 +2,39 @@
 
 import { StatusBadge } from '@/components/status-badge';
 import { prisma } from '@/lib/prisma';
+import { authError, envPresenceSnapshot } from '@/server/auth/auth-observability';
 import { requirePageAuthenticatedUser } from '@/server/auth/require-authenticated-user';
 
 export default async function DashboardPage() {
   const user = await requirePageAuthenticatedUser();
 
-  const [campaignCount, scriptCount, frameCount, videoCount, publicationCount, latestCampaigns] = await Promise.all([
-    prisma.campaign.count({ where: { userId: user.id } }),
-    prisma.videoScript.count({ where: { campaign: { userId: user.id } } }),
-    prisma.scriptFrame.count({ where: { script: { campaign: { userId: user.id } } } }),
-    prisma.generatedVideo.count({ where: { script: { campaign: { userId: user.id } } } }),
-    prisma.tikTokPublication.count({ where: { generatedVideo: { script: { campaign: { userId: user.id } } } } }),
-    prisma.campaign.findMany({
-      where: { userId: user.id },
-      orderBy: { createdAt: 'desc' },
-      take: 5
-    })
-  ]);
+  let campaignCount = 0;
+  let scriptCount = 0;
+  let frameCount = 0;
+  let videoCount = 0;
+  let publicationCount = 0;
+  let latestCampaigns: Awaited<ReturnType<typeof prisma.campaign.findMany>> = [];
+
+  try {
+    [campaignCount, scriptCount, frameCount, videoCount, publicationCount, latestCampaigns] = await Promise.all([
+      prisma.campaign.count({ where: { userId: user.id } }),
+      prisma.videoScript.count({ where: { campaign: { userId: user.id } } }),
+      prisma.scriptFrame.count({ where: { script: { campaign: { userId: user.id } } } }),
+      prisma.generatedVideo.count({ where: { script: { campaign: { userId: user.id } } } }),
+      prisma.tikTokPublication.count({ where: { generatedVideo: { script: { campaign: { userId: user.id } } } } }),
+      prisma.campaign.findMany({
+        where: { userId: user.id },
+        orderBy: { createdAt: 'desc' },
+        take: 5
+      })
+    ]);
+  } catch (error) {
+    authError('dashboard:load-failed', error, {
+      userId: user.id,
+      ...envPresenceSnapshot()
+    });
+    throw error;
+  }
 
   return (
     <div className="space-y-5">
@@ -96,5 +112,3 @@ function Metric({ title, value }: { title: string; value: number }) {
     </div>
   );
 }
-
-

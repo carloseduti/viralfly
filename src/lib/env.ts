@@ -2,6 +2,18 @@ import { z } from 'zod';
 
 const optionalUrl = z.preprocess((value) => (value === '' ? undefined : value), z.string().url().optional());
 const optionalString = z.preprocess((value) => (value === '' ? undefined : value), z.string().optional());
+const optionalBoolean = z.preprocess((value) => {
+  if (value === '' || value === undefined || value === null) {
+    return undefined;
+  }
+  if (value === true || value === 'true') {
+    return true;
+  }
+  if (value === false || value === 'false') {
+    return false;
+  }
+  return value;
+}, z.boolean().optional());
 const isVercel = process.env.VERCEL === '1' || process.env.VERCEL === 'true';
 const defaultDisableQueues = isVercel;
 
@@ -51,7 +63,8 @@ const envSchema = z.object({
   TIKTOK_CLIENT_SECRET: z.string().optional(),
   TIKTOK_REDIRECT_URI: z.string().optional(),
   TIKTOK_ACCESS_TOKEN: z.string().optional(),
-  FFMPEG_PATH: optionalString
+  FFMPEG_PATH: optionalString,
+  AUTH_DEBUG: optionalBoolean.default(false)
 });
 
 const parsed = envSchema.safeParse(process.env);
@@ -71,7 +84,7 @@ export const env = {
   NEXT_PUBLIC_SUPABASE_ANON_KEY: nextPublicAnonKey
 };
 
-const databaseUrlValidationError = validateDatabaseUrl(env.DATABASE_URL);
+const databaseUrlValidationError = validateDatabaseUrl(env.DATABASE_URL, env.NEXT_PUBLIC_SUPABASE_URL);
 
 if (isVercel) {
   const fieldErrors: Record<string, string[]> = {};
@@ -90,6 +103,10 @@ if (isVercel) {
     ];
   }
 
+  if (!env.SUPABASE_SERVICE_ROLE_KEY) {
+    fieldErrors.SUPABASE_SERVICE_ROLE_KEY = ['SUPABASE_SERVICE_ROLE_KEY nao configurada na Vercel.'];
+  }
+
   if (databaseUrlValidationError) {
     fieldErrors.DATABASE_URL = [...(fieldErrors.DATABASE_URL ?? []), databaseUrlValidationError];
   }
@@ -100,7 +117,7 @@ if (isVercel) {
   }
 }
 
-function validateDatabaseUrl(databaseUrl: string) {
+function validateDatabaseUrl(databaseUrl: string, supabaseUrl: string) {
   let parsed: URL;
   try {
     parsed = new URL(databaseUrl);
@@ -126,6 +143,38 @@ function validateDatabaseUrl(databaseUrl: string) {
 
   if (/^db\.[a-z0-9]+\.supabase\.co$/.test(host) && username.includes('.')) {
     return 'DATABASE_URL invalida para host db.<project-ref>.supabase.co: usuario deve ser apenas postgres (sem sufixo do project ref).';
+  }
+
+  const publicRef = extractSupabaseProjectRefFromPublicUrl(supabaseUrl);
+  const databaseRef = extractSupabaseProjectRefFromDatabase(host, username);
+  if (publicRef && databaseRef && publicRef !== databaseRef) {
+    return `DATABASE_URL nao corresponde ao mesmo projeto Supabase do NEXT_PUBLIC_SUPABASE_URL (esperado ref "${publicRef}", recebido "${databaseRef}").`;
+  }
+
+  return null;
+}
+
+function extractSupabaseProjectRefFromPublicUrl(supabaseUrl: string) {
+  try {
+    const hostname = new URL(supabaseUrl).hostname.toLowerCase();
+    const match = hostname.match(/^([a-z0-9]+)\.supabase\.co$/);
+    return match?.[1] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function extractSupabaseProjectRefFromDatabase(hostname: string, username: string) {
+  const dbHostMatch = hostname.match(/^db\.([a-z0-9]+)\.supabase\.co$/);
+  if (dbHostMatch?.[1]) {
+    return dbHostMatch[1];
+  }
+
+  if (hostname.endsWith('.pooler.supabase.com')) {
+    const usernameParts = username.split('.');
+    if (usernameParts.length >= 2) {
+      return usernameParts.slice(1).join('.');
+    }
   }
 
   return null;

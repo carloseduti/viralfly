@@ -5,6 +5,7 @@ import { Space_Grotesk, Source_Sans_3 } from 'next/font/google';
 import '@/app/globals.css';
 import { LogoutButton } from '@/components/logout-button';
 import { ToastCenter } from '@/components/toast-center';
+import { authDebug } from '@/server/auth/auth-observability';
 import { getOptionalAuthenticatedUser } from '@/server/auth/require-authenticated-user';
 
 const headingFont = Space_Grotesk({
@@ -29,7 +30,9 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  authDebug('root-layout:render:start');
   const user = await getOptionalAuthenticatedUser();
+  authDebug('root-layout:render:auth-resolved', { hasUser: Boolean(user?.id) });
 
   return (
     <html lang="pt-BR">

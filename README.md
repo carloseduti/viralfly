@@ -221,15 +221,18 @@ Configuracao recomendada para este projeto:
    - `DATABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY` (ou `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY`)
+   - `SUPABASE_SERVICE_ROLE_KEY`
    Regras importantes para `DATABASE_URL` no Supabase:
    - Se usar `db.<project-ref>.supabase.co:5432`, usuario deve ser `postgres`.
    - Se usar `*.pooler.supabase.com:6543`, usuario deve ser `postgres.<project-ref>`.
    - Senha com caracteres especiais (`@`, `/`, `$`) deve estar em URL encoding.
-3. Em Vercel, configure `DISABLE_QUEUES=true` (workers BullMQ nao rodam como processo dedicado em serverless).
-4. Configure callbacks com o dominio publicado:
+   - `DATABASE_URL` deve apontar para o mesmo `project-ref` da `NEXT_PUBLIC_SUPABASE_URL`.
+4. Para diagnostico detalhado de auth em producao, habilite `AUTH_DEBUG=true` temporariamente.
+5. Em Vercel, configure `DISABLE_QUEUES=true` (workers BullMQ nao rodam como processo dedicado em serverless).
+6. Configure callbacks com o dominio publicado:
    - `NANO_BANANA_CALLBACK_URL=https://SEU_APP.vercel.app/api/integrations/nano-banana/callback`
    - `KIE_AI_CALLBACK_URL=https://SEU_APP.vercel.app/api/integrations/kie-ai/callback`
-5. Mantenha `FFMPEG_PATH` vazio para usar `ffmpeg-static` automaticamente.
+7. Mantenha `FFMPEG_PATH` vazio para usar `ffmpeg-static` automaticamente.
 
 Observacoes:
 - O arquivo `vercel.json` ja define `maxDuration` para as APIs.
