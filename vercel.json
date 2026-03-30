@@ -1,5 +1,6 @@
 {
   "framework": "nextjs",
+  "buildCommand": "npm run build:vercel",
   "functions": {
     "src/app/api/**/*.ts": {
       "maxDuration": 60

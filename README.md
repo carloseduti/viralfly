@@ -217,6 +217,10 @@ Configuracao recomendada para este projeto:
 
 1. Conecte o repositÃ³rio na Vercel (framework `Next.js`).
 2. Defina as variÃ¡veis de ambiente do `.env.example`.
+   ObrigatÃ³rias para subir a aplicaÃ§Ã£o:
+   - `DATABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` (ou `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY`)
 3. Em Vercel, configure `DISABLE_QUEUES=true` (workers BullMQ nao rodam como processo dedicado em serverless).
 4. Configure callbacks com o dominio publicado:
    - `NANO_BANANA_CALLBACK_URL=https://SEU_APP.vercel.app/api/integrations/nano-banana/callback`
@@ -225,6 +229,7 @@ Configuracao recomendada para este projeto:
 
 Observacoes:
 - O arquivo `vercel.json` ja define `maxDuration` para as APIs.
+- O build da Vercel executa `prisma migrate deploy` automaticamente antes do `next build`.
 - Prisma Client e gerado no `postinstall`.
 - Migracoes devem ser executadas no banco alvo com `prisma migrate deploy` no seu fluxo de release.
 

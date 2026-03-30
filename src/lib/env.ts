@@ -2,7 +2,8 @@ import { z } from 'zod';
 
 const optionalUrl = z.preprocess((value) => (value === '' ? undefined : value), z.string().url().optional());
 const optionalString = z.preprocess((value) => (value === '' ? undefined : value), z.string().optional());
-const defaultDisableQueues = process.env.VERCEL === '1' || process.env.VERCEL === 'true';
+const isVercel = process.env.VERCEL === '1' || process.env.VERCEL === 'true';
+const defaultDisableQueues = isVercel;
 
 const envSchema = z.object({
   NEXT_PUBLIC_SUPABASE_URL: z.string().url().default('http://127.0.0.1:54321'),
@@ -69,4 +70,27 @@ export const env = {
   ...parsed.data,
   NEXT_PUBLIC_SUPABASE_ANON_KEY: nextPublicAnonKey
 };
+
+if (isVercel) {
+  const fieldErrors: Record<string, string[]> = {};
+
+  if (/127\.0\.0\.1|localhost/.test(env.DATABASE_URL)) {
+    fieldErrors.DATABASE_URL = ['DATABASE_URL invalida para Vercel. Configure a URL real do Postgres/Supabase.'];
+  }
+
+  if (/127\.0\.0\.1|localhost/.test(env.NEXT_PUBLIC_SUPABASE_URL)) {
+    fieldErrors.NEXT_PUBLIC_SUPABASE_URL = ['NEXT_PUBLIC_SUPABASE_URL invalida para Vercel. Use a URL real do projeto Supabase.'];
+  }
+
+  if (env.NEXT_PUBLIC_SUPABASE_ANON_KEY === 'dev-anon-key') {
+    fieldErrors.NEXT_PUBLIC_SUPABASE_ANON_KEY = [
+      'NEXT_PUBLIC_SUPABASE_ANON_KEY nao configurada na Vercel.'
+    ];
+  }
+
+  if (Object.keys(fieldErrors).length > 0) {
+    console.error('Variaveis obrigatorias ausentes/invalidas para Vercel', fieldErrors);
+    throw new Error('Configuracao invalida de ambiente para Vercel.');
+  }
+}
 
