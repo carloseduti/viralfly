@@ -20,7 +20,7 @@ export class VideoAssemblyService {
     private readonly assembler = new VideoAssemblerService()
   ) {}
 
-  async assembleVideoFromScript(userId: string, scriptId: string) {
+  async assembleVideoFromScript(userId: string, scriptId: string, forceRemount = false) {
     const script = await this.scriptRepository.findByIdAndUser(scriptId, userId);
     if (!script) {
       throw new AppError('Roteiro nao encontrado', 404);
@@ -28,6 +28,14 @@ export class VideoAssemblyService {
 
     if (!script.campaign.baseImagePublicUrl) {
       throw new AppError('Produto nao encontrado', 404);
+    }
+
+    if (!forceRemount && script.generatedVideo?.statusMontagem === VideoAssemblyStatus.PROCESSING) {
+      return { queued: false, processed: false, alreadyQueued: true };
+    }
+
+    if (!forceRemount && script.generatedVideo?.statusMontagem === VideoAssemblyStatus.GENERATED) {
+      return { queued: false, processed: false, alreadyGenerated: true, videoId: script.generatedVideo.id };
     }
 
     ensureFramesGeneratedForAssembly(script.frames);

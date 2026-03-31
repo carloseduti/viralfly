@@ -1,0 +1,62 @@
+{
+  "brand": "Viralfly",
+  "tagline": "AI Video Automation",
+  "nav": {
+    "dashboard": "Dashboard",
+    "products": "Products",
+    "videoHistory": "Video History",
+    "analytics": "Analytics",
+    "settings": "Settings",
+    "createNewVideo": "Create New Video",
+    "helpCenter": "Help Center",
+    "logOut": "Log Out",
+    "logIn": "Log In",
+    "getStarted": "Get Started",
+    "platform": "Platform",
+    "solutions": "Solutions",
+    "pricing": "Pricing",
+    "company": "Company"
+  },
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "filter": "Filters",
+    "retry": "Retry",
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "confirm": "Confirm"
+  },
+  "status": {
+    "active": "Active",
+    "draft": "Draft",
+    "processing": "Processing",
+    "failed": "Failed",
+    "success": "Success",
+    "pending": "Pending",
+    "running": "Running",
+    "skipped": "Skipped",
+    "generated": "Generated",
+    "published": "Published",
+    "readyToPublish": "Ready to Publish"
+  },
+  "language": {
+    "label": "Language",
+    "ptBR": "Portugues (BR)",
+    "enUS": "English (US)"
+  },
+  "notifications": "Notifications",
+  "profile": "Profile",
+  "search": "Search...",
+  "footer": {
+    "copyright": "© 2024 Viralfly AI",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "security": "Security",
+    "status": "Status",
+    "apiDocs": "API Docs"
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "hero": {
+    "badge": "AI-POWERED CINEMATOGRAPHY",
+    "titlePart1": "Transform Your Product Images into ",
+    "titleGradient": "Viral TikTok Ads",
+    "titlePart2": " with AI",
+    "subtitle": "Turn static assets into cinematic, high-conversion short-form video content in seconds using our specialized kinetic video pipeline.",
+    "cta1": "Start Generating Free",
+    "cta2": "Watch Demo Reel"
+  },
+  "features": {
+    "sectionTitle": "Precision-Engineered Creative",
+    "sectionSubtitle": "Three pillars of automated viral growth.",
+    "nanoBanana": {
+      "title": "Nano Banana Image Gen",
+      "description": "Our proprietary engine generates studio-quality lifestyle backgrounds for your products that outperform traditional stock."
+    },
+    "scriptwriting": {
+      "title": "AI Scriptwriting",
+      "description": "Analyzes high-performing TikTok hooks to generate scripts that stop the scroll and drive immediate action."
+    },
+    "pipeline": {
+      "title": "1-Click Video Pipeline",
+      "description": "From image to ready-to-post vertical video with music, captions, and transitions in a single click."
+    }
+  },
+  "workflow": {
+    "sectionTitle": "The Automation Pipeline",
+    "sectionSubtitle": "Upload once, scale infinitely. Our pipeline handles the complex creative heavy lifting.",
+    "step1": {
+      "title": "Ingest",
+      "description": "Upload your raw product photos or URL."
+    },
+    "step2": {
+      "title": "Enhance",
+      "description": "AI generates immersive backgrounds."
+    },
+    "step3": {
+      "title": "Direct",
+      "description": "Scripts and hooks are automatically written."
+    },
+    "step4": {
+      "title": "Export",
+      "description": "Download viral-ready vertical video."
+    }
+  },
+  "pricing": {
+    "sectionTitle": "Scale Your Creative",
+    "sectionSubtitle": "Choose the plan that fits your production volume.",
+    "starter": {
+      "name": "Starter",
+      "price": "$49",
+      "period": "/mo",
+      "cta": "Select Starter",
+      "features": ["5 AI Videos / Month", "Standard Image Gen", "TikTok Music Library"]
+    },
+    "pro": {
+      "name": "Pro",
+      "price": "$149",
+      "period": "/mo",
+      "badge": "MOST POPULAR",
+      "cta": "Go Pro Now",
+      "features": ["30 AI Videos / Month", "Nano Banana Premium Gen", "Custom Script Training"],
+      "highlight": "1-Click Multi-Variation"
+    },
+    "enterprise": {
+      "name": "Enterprise",
+      "price": "Custom",
+      "period": "",
+      "cta": "Contact Sales",
+      "features": ["Unlimited Generations", "Full API Access", "Dedicated Creative Director"]
+    }
+  }
+}

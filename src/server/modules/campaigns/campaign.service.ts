@@ -1,6 +1,6 @@
 import { extname } from 'node:path';
 
-import { CampaignStatus, FrameStatus, Prisma } from '@prisma/client';
+import { CampaignStatus, FrameStatus, Prisma, PublicationStatus, VideoAssemblyStatus } from '@prisma/client';
 
 import { buildVideoMasterObject } from '@/server/domain/video-master';
 import { CampaignRepository } from '@/server/repositories/campaign.repository';
@@ -10,6 +10,8 @@ import { AppError } from '@/utils/errors';
 type CreateCampaignInput = {
   nomeProduto: string;
   tipoProduto: string;
+  gerarImagemBaseNanoBanana?: boolean;
+  gerarRoteiroComIa?: boolean;
   descricaoProduto?: string;
   idioma?: string;
   ctaPreferido?: string;
@@ -43,6 +45,8 @@ export class CampaignService {
       userId,
       nomeProduto: defaults.nomeProduto,
       tipoProduto: defaults.tipoProduto,
+      gerarImagemBaseNanoBanana: defaults.gerarImagemBaseNanoBanana,
+      gerarRoteiroComIa: defaults.gerarRoteiroComIa,
       descricaoProduto: defaults.descricaoProduto,
       nicho: defaults.tipoProduto,
       idioma: defaults.idioma,
@@ -126,12 +130,41 @@ export class CampaignService {
     return updated;
   }
 
+  async deleteCampaign(userId: string, campaignId: string) {
+    const campaign = await this.campaignRepository.findByIdAndUser(campaignId, userId);
+    if (!campaign) {
+      throw new AppError('Produto nao encontrado', 404);
+    }
+
+    const hasProcessing = this.isPipelineProcessing(campaign);
+    if (hasProcessing) {
+      throw new AppError('A pipeline deste produto esta em processamento. Aguarde finalizar para excluir.', 409);
+    }
+
+    const summary = await this.campaignRepository.getDeletionSummary(campaignId, userId);
+    if (!summary) {
+      throw new AppError('Produto nao encontrado', 404);
+    }
+
+    const deleted = await this.campaignRepository.deleteByIdAndUser(campaignId, userId);
+    if (!deleted) {
+      throw new AppError('Produto nao encontrado', 404);
+    }
+
+    return {
+      ...summary,
+      deleted: true
+    };
+  }
+
   private applyDefaults(input: CreateCampaignInput) {
     const tipoProduto = input.tipoProduto.trim();
 
     return {
       nomeProduto: input.nomeProduto.trim(),
       tipoProduto,
+      gerarImagemBaseNanoBanana: input.gerarImagemBaseNanoBanana ?? true,
+      gerarRoteiroComIa: input.gerarRoteiroComIa ?? true,
       descricaoProduto: input.descricaoProduto?.trim() || `Produto ${tipoProduto} para anuncios curtos.`,
       idioma: input.idioma?.trim() || 'pt-BR',
       ctaPreferido: input.ctaPreferido?.trim() || 'Compre agora',
@@ -156,6 +189,14 @@ export class CampaignService {
       if (!input.descricaoProduto && tipoProduto !== existingTipoProduto) {
         data.descricaoProduto = `Produto ${tipoProduto} para anuncios curtos.`;
       }
+    }
+
+    if (typeof input.gerarImagemBaseNanoBanana === 'boolean') {
+      data.gerarImagemBaseNanoBanana = input.gerarImagemBaseNanoBanana;
+    }
+
+    if (typeof input.gerarRoteiroComIa === 'boolean') {
+      data.gerarRoteiroComIa = input.gerarRoteiroComIa;
     }
 
     if (input.descricaoProduto) {
@@ -206,6 +247,33 @@ export class CampaignService {
   private buildImageStoragePath(userId: string, campaignId: string, fileName: string, mimeType: string) {
     const extension = resolveImageExtension(fileName, mimeType);
     return `product-images/${userId}/${campaignId}/original.${extension}`;
+  }
+
+  private isPipelineProcessing(campaign: {
+    baseImageStatus: FrameStatus;
+    scripts: Array<{
+      frames: Array<{ status: FrameStatus; generatedFrame: { status: FrameStatus } | null }>;
+      generatedVideo: {
+        statusMontagem: VideoAssemblyStatus;
+        publication: { status: PublicationStatus } | null;
+      } | null;
+    }>;
+  }) {
+    if (campaign.baseImageStatus === FrameStatus.PROCESSING) {
+      return true;
+    }
+
+    return campaign.scripts.some((script) => {
+      if (script.frames.some((frame) => frame.status === FrameStatus.PROCESSING || frame.generatedFrame?.status === FrameStatus.PROCESSING)) {
+        return true;
+      }
+
+      if (script.generatedVideo?.statusMontagem === VideoAssemblyStatus.PROCESSING) {
+        return true;
+      }
+
+      return script.generatedVideo?.publication?.status === PublicationStatus.PROCESSING;
+    });
   }
 }
 

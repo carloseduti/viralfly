@@ -1,0 +1,58 @@
+{
+  "title": "Produtos",
+  "subtitle": "Gerencie seus produtos e campanhas de video.",
+  "newProduct": "Novo Produto",
+  "noProducts": "Nenhum produto cadastrado ainda. Comece com o upload de uma imagem.",
+  "table": {
+    "name": "Nome do Produto",
+    "category": "Categoria",
+    "status": "Status",
+    "created": "Criado",
+    "actions": "Acoes"
+  },
+  "pagination": {
+    "showing": "Mostrando {{from}} a {{to}} de {{total}} produtos"
+  },
+  "form": {
+    "createTitle": "Novo Produto",
+    "editTitle": "Editar Produto",
+    "createSubtitle": "Cadastre nome, tipo e imagem para gerar anuncios dinamicos mantendo a identidade visual do produto.",
+    "editSubtitle": "Atualize dados e imagem de referencia sem quebrar o pipeline atual.",
+    "productName": "Nome do Produto",
+    "productType": "Tipo do Produto",
+    "price": "Valor",
+    "description": "Descricao Comercial",
+    "descriptionPlaceholder": "Descreva o beneficio principal para usar no roteiro.",
+    "cta": "CTA Preferido",
+    "language": "Idioma",
+    "campaignTone": "Tom da Campanha",
+    "visualStyle": "Estilo Visual",
+    "sceneDirection": "Direcao das Cenas",
+    "imageUpload": "Imagem de Referencia",
+    "imageUploadHint": "Clique ou arraste a imagem",
+    "imageFormats": "PNG, JPG ate 10MB",
+    "imageRequired": "Obrigatoria para gerar a imagem base publicitaria antes do roteiro e dos frames.",
+    "noImage": "Nenhuma imagem enviada ainda.",
+    "baseImage": "Imagem base publicitaria atual",
+    "automation": "Automacao IA",
+    "generateNanoBanana": "Gerar imagem com Nano Banana",
+    "generateScript": "Gerar roteiro com IA",
+    "proTip": "Dica Pro",
+    "proTipText": "Descricoes detalhadas do produto geram roteiros mais persuasivos e videos de melhor qualidade.",
+    "save": "Salvar Produto",
+    "saving": "Salvando...",
+    "saveChanges": "Salvar Alteracoes",
+    "cancel": "Cancelar",
+    "imageError": "Imagem do produto e obrigatoria para gerar os frames",
+    "saveError": "Falha ao salvar produto",
+    "createSuccess": "Produto criado com sucesso e pipeline iniciada",
+    "editSuccess": "Produto atualizado com sucesso"
+  },
+  "delete": {
+    "button": "Excluir",
+    "confirm": "Tem certeza que deseja excluir \"{{name}}\"?",
+    "warning": "Esta acao nao pode ser desfeita."
+  },
+  "baseImageStatus": "Imagem base: {{status}}",
+  "noImage": "Sem imagem"
+}

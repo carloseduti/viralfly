@@ -10,9 +10,11 @@ import {
   type VideoAssemblyJob
 } from '@/server/jobs/constants';
 import { FrameGenerationService } from '@/server/modules/frames/frame-generation.service';
+import { PipelineOrchestratorService } from '@/server/modules/pipeline/pipeline-orchestrator.service';
 import { PublicationService } from '@/server/modules/publications/publication.service';
 import { ScriptService } from '@/server/modules/scripts/script.service';
 import { VideoAssemblyService } from '@/server/modules/videos/video-assembly.service';
+import { ScriptRepository } from '@/server/repositories/script.repository';
 
 if (env.DISABLE_QUEUES) {
   console.log('DISABLE_QUEUES=true: workers desabilitados (modo síncrono via API).');
@@ -27,6 +29,8 @@ const scriptService = new ScriptService();
 const frameService = new FrameGenerationService();
 const videoService = new VideoAssemblyService();
 const publicationService = new PublicationService();
+const pipelineService = new PipelineOrchestratorService();
+const scriptRepository = new ScriptRepository();
 
 function attachLogging(worker: Worker) {
   worker.on('completed', (job) => {
@@ -42,6 +46,7 @@ const scriptWorker = new Worker<ScriptGenerationJob>(
   QUEUES.SCRIPT_GENERATION,
   async (job) => {
     await scriptService.handleScriptGenerationJob(job.data);
+    await pipelineService.startOrResume(job.data.userId, job.data.campaignId);
   },
   { connection: redisConnection }
 );
@@ -50,6 +55,10 @@ const frameWorker = new Worker<FrameGenerationJob>(
   QUEUES.FRAME_GENERATION,
   async (job) => {
     await frameService.handleFrameGenerationJob(job.data);
+    const script = await scriptRepository.findByIdAndUser(job.data.scriptId, job.data.userId);
+    if (script) {
+      await pipelineService.startOrResume(job.data.userId, script.campaignId);
+    }
   },
   { connection: redisConnection, concurrency: 3 }
 );
@@ -58,6 +67,10 @@ const videoWorker = new Worker<VideoAssemblyJob>(
   QUEUES.VIDEO_ASSEMBLY,
   async (job) => {
     await videoService.handleAssemblyJob(job.data);
+    const script = await scriptRepository.findByIdAndUser(job.data.scriptId, job.data.userId);
+    if (script) {
+      await pipelineService.startOrResume(job.data.userId, script.campaignId);
+    }
   },
   { connection: redisConnection }
 );

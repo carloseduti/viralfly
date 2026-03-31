@@ -18,7 +18,7 @@ type PromptCampaignContext = {
   campaignTone: string;
   sceneDirection: string;
   marketingScript: string;
-  baseImagePublicUrl: string;
+  referenceImagePublicUrl: string;
 };
 
 type ProviderFrameCallbackPayload = {
@@ -51,8 +51,13 @@ export class FrameGenerationService {
       throw new AppError('Roteiro nao encontrado', 404);
     }
 
-    if (!script.campaign.baseImagePublicUrl || script.campaign.baseImageStatus !== FrameStatus.GENERATED) {
-      throw new AppError('Imagem base publicitaria e obrigatoria para gerar os frames', 422);
+    const referenceImage = this.resolveReferenceImage(script.campaign);
+    if (!referenceImage) {
+      throw new AppError('Imagem de referencia do produto e obrigatoria para gerar os frames', 422);
+    }
+
+    if (!forceRegenerate && script.frames.some((frame) => frame.generatedFrame?.status === FrameStatus.PROCESSING)) {
+      return { queued: false, processed: false, alreadyQueued: true };
     }
 
     const payload = {
@@ -98,8 +103,9 @@ export class FrameGenerationService {
       throw new AppError('Roteiro nao encontrado', 404);
     }
 
-    if (!script.campaign.baseImagePublicUrl || script.campaign.baseImageStatus !== FrameStatus.GENERATED) {
-      throw new AppError('Imagem base publicitaria e obrigatoria para gerar os frames', 422);
+    const referenceImage = this.resolveReferenceImage(script.campaign);
+    if (!referenceImage) {
+      throw new AppError('Imagem de referencia do produto e obrigatoria para gerar os frames', 422);
     }
 
     const frames = selectFramesForGeneration(script.frames, payload.frameId);
@@ -109,6 +115,10 @@ export class FrameGenerationService {
 
     for (const frame of frames) {
       if (!payload.forceRegenerate && frame.generatedFrame?.status === FrameStatus.GENERATED) {
+        continue;
+      }
+
+      if (!payload.forceRegenerate && frame.generatedFrame?.status === FrameStatus.PROCESSING) {
         continue;
       }
 
@@ -124,7 +134,7 @@ export class FrameGenerationService {
           campaignTone: script.campaignTone ?? script.campaign.campaignTone,
           sceneDirection: script.sceneDirection ?? script.campaign.sceneDirection,
           marketingScript: script.marketingScript ?? '',
-          baseImagePublicUrl: script.campaign.baseImagePublicUrl!
+          referenceImagePublicUrl: referenceImage
         }
       );
     }
@@ -213,7 +223,13 @@ export class FrameGenerationService {
       });
       await this.frameRepository.markFrameStatus(scriptFrame.id, FrameStatus.GENERATED);
 
-      return { acknowledged: true, updated: true, status: 'GENERATED' as const };
+      return {
+        acknowledged: true,
+        updated: true,
+        status: 'GENERATED' as const,
+        campaignId: campaign.id,
+        userId: campaign.userId
+      };
     }
 
     const errorMessage = payload.data?.failReason ?? payload.msg ?? 'Falha na geracao do frame reportada pelo callback';
@@ -228,7 +244,13 @@ export class FrameGenerationService {
     });
     await this.frameRepository.markFrameStatus(generatedFrame.scriptFrameId, FrameStatus.FAILED);
 
-    return { acknowledged: true, updated: true, status: 'FAILED' as const };
+    return {
+      acknowledged: true,
+      updated: true,
+      status: 'FAILED' as const,
+      campaignId: generatedFrame.scriptFrame.script.campaign.id,
+      userId: generatedFrame.scriptFrame.script.campaign.userId
+    };
   }
 
   private async processSingleFrame(
@@ -258,7 +280,7 @@ export class FrameGenerationService {
         durationSeconds: frame.duracaoSegundos,
         aspectRatio: '9:16',
         format: 'mp4',
-        referenceImageUrl: campaign.baseImagePublicUrl
+        referenceImageUrl: campaign.referenceImagePublicUrl
       });
 
       await this.frameRepository.upsertGeneratedFrame(frame.id, {
@@ -367,6 +389,32 @@ export class FrameGenerationService {
 
     await this.frameRepository.markFrameStatus(payload.frameId, FrameStatus.GENERATED);
   }
+
+  private resolveReferenceImage(campaign: {
+    imagePublicUrl: string | null;
+    baseImagePublicUrl: string | null;
+    baseImageStatus: FrameStatus;
+    gerarImagemBaseNanoBanana?: boolean;
+  }) {
+    return resolveReferenceImageFromCampaign(campaign);
+  }
+}
+
+function resolveReferenceImageFromCampaign(campaign: {
+  imagePublicUrl: string | null;
+  baseImagePublicUrl: string | null;
+  baseImageStatus: FrameStatus;
+  gerarImagemBaseNanoBanana?: boolean;
+}) {
+  if (campaign.gerarImagemBaseNanoBanana ?? true) {
+    if (campaign.baseImagePublicUrl && campaign.baseImageStatus === FrameStatus.GENERATED) {
+      return campaign.baseImagePublicUrl;
+    }
+
+    return null;
+  }
+
+  return campaign.baseImagePublicUrl ?? campaign.imagePublicUrl;
 }
 
 function buildPromptForVeo(
@@ -383,7 +431,7 @@ function buildPromptForVeo(
 
   return [
     `Produto principal: ${campaign.nomeProduto} (${campaign.tipoProduto}).`,
-    `Referencia visual obrigatoria: ${campaign.baseImagePublicUrl}.`,
+    `Referencia visual obrigatoria: ${campaign.referenceImagePublicUrl}.`,
     `Roteiro mestre unico: ${campaign.marketingScript}.`,
     `Tom unico da campanha: ${campaign.campaignTone}.`,
     `Direcao narrativa entre cenas: ${campaign.sceneDirection}.`,
@@ -405,3 +453,4 @@ function buildPromptForVeo(
 function wait(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
+

@@ -1,0 +1,42 @@
+{
+  "title": "Dashboard",
+  "lifetimeOutput": "Producao Total",
+  "thisMonth": "+{{percent}}% este mes",
+  "resourceAllocation": "Alocacao de Recursos",
+  "gpu": "GPU",
+  "cloudStorage": "Armazenamento Cloud",
+  "activePipelines": "Pipelines Ativos",
+  "quickCommands": "Comandos Rapidos",
+  "recentProducts": "Produtos Recentes",
+  "recentAutomations": "Automacoes Recentes",
+  "createProduct": "Cadastrar novo produto",
+  "viewAllProducts": "Ver todos os produtos",
+  "noProducts": "Nenhum produto criado ainda.",
+  "metrics": {
+    "products": "Produtos",
+    "scripts": "Roteiros",
+    "frames": "Frames",
+    "videos": "Videos",
+    "publications": "Publicacoes"
+  },
+  "operationPanel": "Painel de operacao",
+  "heroTitle": "Gere anuncios dinamicos com base na imagem do produto",
+  "heroDescription": "Pipeline: imagem do produto -> imagem base Nano Banana -> roteiro mestre -> 3 frames Veo -> montagem -> publicacao.",
+  "pipelineOrder": "Ordem obrigatoria",
+  "steps": {
+    "upload": "Upload da imagem do produto",
+    "baseImage": "Gerar imagem base publicitaria",
+    "script": "Gerar roteiro mestre",
+    "frames": "Gerar frames consistentes",
+    "video": "Montar video",
+    "publish": "Publicar"
+  },
+  "viewAll": "Ver lista completa",
+  "createdAt": "Criado em {{date}}",
+  "automationCredits": "Creditos de Automacao",
+  "remaining": "{{count}} restantes",
+  "used": "{{percent}}% utilizado",
+  "efficiency": "Eficiencia",
+  "videosRendered": "Videos Renderizados",
+  "totalReach": "Alcance Total"
+}

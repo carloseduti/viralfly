@@ -1,0 +1,74 @@
+{
+  "hero": {
+    "badge": "CINEMATOGRAFIA COM IA",
+    "titlePart1": "Transforme Imagens de Produto em ",
+    "titleGradient": "Anuncios Virais no TikTok",
+    "titlePart2": " com IA",
+    "subtitle": "Converta ativos estaticos em conteudo de video de curta duracao cinematografico e de alta conversao em segundos usando nosso pipeline de video cinetico especializado.",
+    "cta1": "Comece a Gerar Gratis",
+    "cta2": "Assista a Demo"
+  },
+  "features": {
+    "sectionTitle": "Criatividade de Precisao",
+    "sectionSubtitle": "Tres pilares do crescimento viral automatizado.",
+    "nanoBanana": {
+      "title": "Geracao de Imagem Nano Banana",
+      "description": "Nosso motor proprietario gera fundos lifestyle de qualidade estudio para seus produtos que superam o stock tradicional."
+    },
+    "scriptwriting": {
+      "title": "Roteiros com IA",
+      "description": "Analisa os hooks mais performaticos do TikTok para gerar roteiros que param o scroll e geram acao imediata."
+    },
+    "pipeline": {
+      "title": "Pipeline de Video 1-Click",
+      "description": "Da imagem ao video vertical pronto para publicar com musica, legendas e transicoes em um unico clique."
+    }
+  },
+  "workflow": {
+    "sectionTitle": "O Pipeline de Automacao",
+    "sectionSubtitle": "Faca upload uma vez, escale infinitamente. Nosso pipeline cuida de todo o trabalho criativo pesado.",
+    "step1": {
+      "title": "Ingest",
+      "description": "Faca upload das fotos brutas do produto ou URL."
+    },
+    "step2": {
+      "title": "Enhance",
+      "description": "A IA gera fundos imersivos."
+    },
+    "step3": {
+      "title": "Direct",
+      "description": "Roteiros e hooks sao escritos automaticamente."
+    },
+    "step4": {
+      "title": "Export",
+      "description": "Baixe o video vertical pronto para viralizar."
+    }
+  },
+  "pricing": {
+    "sectionTitle": "Escale sua Criatividade",
+    "sectionSubtitle": "Escolha o plano que se adapta ao seu volume de producao.",
+    "starter": {
+      "name": "Starter",
+      "price": "$49",
+      "period": "/mes",
+      "cta": "Selecionar Starter",
+      "features": ["5 Videos de IA / Mes", "Geracao de Imagem Padrao", "Biblioteca de Musicas TikTok"]
+    },
+    "pro": {
+      "name": "Pro",
+      "price": "$149",
+      "period": "/mes",
+      "badge": "MAIS POPULAR",
+      "cta": "Ir para o Pro",
+      "features": ["30 Videos de IA / Mes", "Nano Banana Premium Gen", "Treinamento de Roteiro"],
+      "highlight": "Multi-Variacao 1-Click"
+    },
+    "enterprise": {
+      "name": "Enterprise",
+      "price": "Personalizado",
+      "period": "",
+      "cta": "Falar com Vendas",
+      "features": ["Geracoes Ilimitadas", "Acesso Total a API", "Diretor Criativo Dedicado"]
+    }
+  }
+}

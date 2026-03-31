@@ -21,11 +21,15 @@ export class PublicationService {
   async preparePublication(userId: string, videoId: string, modoVisibilidade: 'PRIVATE' | 'PUBLIC' | 'FOLLOWERS') {
     const video = await this.videoRepository.findByIdAndUser(videoId, userId);
     if (!video) {
-      throw new AppError('Vídeo não encontrado', 404);
+      throw new AppError('Video nao encontrado', 404);
+    }
+
+    if (video.publication && ['READY_TO_PUBLISH', 'PROCESSING', 'PUBLISHED'].includes(video.publication.status)) {
+      return video.publication;
     }
 
     if (video.statusMontagem !== 'GENERATED' || !video.storagePath) {
-      throw new AppError('Não publicar sem vídeo final gerado', 422);
+      throw new AppError('Nao publicar sem video final gerado', 422);
     }
 
     const ctaFrame = video.script.frames.find((frame) => frame.ordem === 3);
@@ -47,11 +51,19 @@ export class PublicationService {
   async publishToTikTok(userId: string, publicationId: string) {
     const publication = await this.publicationRepository.findByIdAndUser(publicationId, userId);
     if (!publication) {
-      throw new AppError('Publicação não encontrada', 404);
+      throw new AppError('Publicacao nao encontrada', 404);
+    }
+
+    if (publication.status === PublicationStatus.PROCESSING) {
+      return { queued: false, processed: false, alreadyQueued: true };
+    }
+
+    if (publication.status === PublicationStatus.PUBLISHED) {
+      return { queued: false, processed: false, alreadyPublished: true };
     }
 
     if (!['READY_TO_PUBLISH', 'FAILED'].includes(publication.status)) {
-      throw new AppError('Publicação ainda não está pronta para envio', 422);
+      throw new AppError('Publicacao ainda nao esta pronta para envio', 422);
     }
 
     const payload = { publicationId, userId } satisfies TikTokPublicationJob;
@@ -68,12 +80,12 @@ export class PublicationService {
   async handlePublicationJob(payload: TikTokPublicationJob) {
     const publication = await this.publicationRepository.findByIdAndUser(payload.publicationId, payload.userId);
     if (!publication) {
-      throw new AppError('Publicação não encontrada', 404);
+      throw new AppError('Publicacao nao encontrada', 404);
     }
 
     const videoPath = publication.generatedVideo.storagePath;
     if (!videoPath) {
-      throw new AppError('Vídeo final ausente para publicação', 422);
+      throw new AppError('Video final ausente para publicacao', 422);
     }
 
     await this.publicationRepository.updateStatus(publication.id, PublicationStatus.PROCESSING, { erro: null });
@@ -95,7 +107,7 @@ export class PublicationService {
       }
 
       if (status.status !== 'PUBLISHED') {
-        throw new AppError(status.error ?? 'Falha ao iniciar publicação no TikTok', 500);
+        throw new AppError(status.error ?? 'Falha ao iniciar publicacao no TikTok', 500);
       }
 
       await this.publicationRepository.updateStatus(publication.id, PublicationStatus.PUBLISHED, {
@@ -105,7 +117,7 @@ export class PublicationService {
       });
     } catch (error) {
       await this.publicationRepository.updateStatus(publication.id, PublicationStatus.FAILED, {
-        erro: error instanceof Error ? error.message : 'Falha ao iniciar publicação no TikTok'
+        erro: error instanceof Error ? error.message : 'Falha ao iniciar publicacao no TikTok'
       });
       throw error;
     }
@@ -114,7 +126,7 @@ export class PublicationService {
   async getPublicationById(userId: string, publicationId: string) {
     const publication = await this.publicationRepository.findByIdAndUser(publicationId, userId);
     if (!publication) {
-      throw new AppError('Publicação não encontrada', 404);
+      throw new AppError('Publicacao nao encontrada', 404);
     }
 
     return publication;

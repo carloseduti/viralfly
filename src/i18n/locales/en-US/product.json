@@ -1,0 +1,58 @@
+{
+  "title": "Products",
+  "subtitle": "Manage your products and video campaigns.",
+  "newProduct": "New Product",
+  "noProducts": "No products registered yet. Start by uploading an image.",
+  "table": {
+    "name": "Product Name",
+    "category": "Category",
+    "status": "Status",
+    "created": "Created",
+    "actions": "Actions"
+  },
+  "pagination": {
+    "showing": "Showing {{from}} to {{to}} of {{total}} products"
+  },
+  "form": {
+    "createTitle": "New Product",
+    "editTitle": "Edit Product",
+    "createSubtitle": "Register name, type and image to generate dynamic ads while maintaining product visual identity.",
+    "editSubtitle": "Update data and reference image without breaking the current pipeline.",
+    "productName": "Product Name",
+    "productType": "Product Type",
+    "price": "Price",
+    "description": "Commercial Description",
+    "descriptionPlaceholder": "Describe the main benefit to use in the script.",
+    "cta": "Preferred CTA",
+    "language": "Language",
+    "campaignTone": "Campaign Tone",
+    "visualStyle": "Visual Style",
+    "sceneDirection": "Scene Direction",
+    "imageUpload": "Reference Image",
+    "imageUploadHint": "Click or drag image",
+    "imageFormats": "PNG, JPG up to 10MB",
+    "imageRequired": "Required to generate the advertising base image before the script and frames.",
+    "noImage": "No image uploaded yet.",
+    "baseImage": "Current advertising base image",
+    "automation": "AI Automation",
+    "generateNanoBanana": "Generate image with Nano Banana",
+    "generateScript": "Generate script with AI",
+    "proTip": "Pro Tip",
+    "proTipText": "Detailed product descriptions generate more persuasive scripts and higher quality videos.",
+    "save": "Save Product",
+    "saving": "Saving...",
+    "saveChanges": "Save Changes",
+    "cancel": "Cancel",
+    "imageError": "Product image is required to generate frames",
+    "saveError": "Failed to save product",
+    "createSuccess": "Product created successfully and pipeline started",
+    "editSuccess": "Product updated successfully"
+  },
+  "delete": {
+    "button": "Delete",
+    "confirm": "Are you sure you want to delete \"{{name}}\"?",
+    "warning": "This action cannot be undone."
+  },
+  "baseImageStatus": "Base image: {{status}}",
+  "noImage": "No image"
+}

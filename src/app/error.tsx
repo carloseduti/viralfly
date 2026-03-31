@@ -17,12 +17,12 @@ export default function GlobalError({
   }, [error]);
 
   return (
-    <div className="mx-auto max-w-xl rounded-xl border border-rose-200 bg-rose-50 p-5 text-rose-900">
+    <div className="mx-auto max-w-xl rounded-xl border border-error/30 bg-error/10 p-5 text-error">
       <h2 className="text-lg font-semibold">Erro ao carregar a aplicacao</h2>
-      <p className="mt-2 text-sm">
+      <p className="mt-2 text-sm text-on-surface-variant">
         Ocorreu uma falha no carregamento server-side. Se o problema persistir, verifique os logs da Vercel.
       </p>
-      <p className="mt-2 text-xs">Digest: {error.digest ?? 'indisponivel'}</p>
+      <p className="mt-2 text-xs text-outline">Digest: {error.digest ?? 'indisponivel'}</p>
       <button type="button" className="btn mt-4" onClick={reset}>
         Tentar novamente
       </button>

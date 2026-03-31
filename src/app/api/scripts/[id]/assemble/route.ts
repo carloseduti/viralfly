@@ -8,10 +8,10 @@ const videoService = new VideoAssemblyService();
 
 export async function POST(request: Request, context: { params: Promise<{ id: string }> }) {
   return withRouteErrorHandling(async () => {
-    await assembleVideoSchema.parse(await request.json().catch(() => ({})));
+    const payload = await assembleVideoSchema.parse(await request.json().catch(() => ({})));
     const user = await requireAuthenticatedUser();
     const { id } = await context.params;
-    const result = await videoService.assembleVideoFromScript(user.id, id);
+    const result = await videoService.assembleVideoFromScript(user.id, id, payload.forceRemount);
     return successResponse(result, 202);
   });
 }

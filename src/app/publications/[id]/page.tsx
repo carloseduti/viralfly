@@ -16,13 +16,13 @@ export default async function PublicationDetailPage({ params }: { params: Promis
         <div>
           <p className="badge-soft">Publicacao automatizada</p>
           <h1 className="mt-2 text-2xl font-semibold">Envio para TikTok</h1>
-          <p className="mt-1 text-sm text-slate-600">{'Fluxo: initialize -> upload media -> status final.'}</p>
+          <p className="mt-1 text-sm text-on-surface-variant">{'Fluxo: initialize -> upload media -> status final.'}</p>
         </div>
         <StatusBadge status={publication.status} />
       </section>
 
       <section className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
-        <div className="card space-y-2 text-sm text-slate-700">
+        <div className="card space-y-2 text-sm text-on-surface-variant">
           <p>
             <strong>Legenda:</strong> {publication.legendaPublicacao}
           </p>
@@ -39,7 +39,7 @@ export default async function PublicationDetailPage({ params }: { params: Promis
             <strong>Creator ID:</strong> {publication.creatorTikTokId ?? 'nao disponivel'}
           </p>
           {publication.erro ? (
-            <p className="rounded-md border border-rose-200 bg-rose-50 px-2 py-1 text-rose-700">
+            <p className="rounded-lg border border-error/30 bg-error/10 px-2 py-1 text-error">
               <strong>Erro:</strong> {publication.erro}
             </p>
           ) : null}

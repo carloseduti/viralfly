@@ -16,6 +16,8 @@ export default async function EditCampaignPage({ params }: { params: Promise<{ i
         id: campaign.id,
         nomeProduto: campaign.nomeProduto,
         tipoProduto: campaign.tipoProduto,
+        gerarImagemBaseNanoBanana: campaign.gerarImagemBaseNanoBanana,
+        gerarRoteiroComIa: campaign.gerarRoteiroComIa,
         descricaoProduto: campaign.descricaoProduto,
         idioma: campaign.idioma,
         ctaPreferido: campaign.ctaPreferido,

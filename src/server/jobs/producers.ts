@@ -17,9 +17,16 @@ export async function enqueueScriptGenerationJob(payload: ScriptGenerationJob) {
     return null;
   }
 
-  return scriptGenerationQueue.add('generate-script', payload, {
-    jobId: `script:${payload.campaignId}`
-  });
+  try {
+    return await scriptGenerationQueue.add('generate-script', payload, {
+      jobId: `script:${payload.campaignId}`
+    });
+  } catch (error) {
+    if (isDuplicateJobError(error)) {
+      return null;
+    }
+    throw error;
+  }
 }
 
 export async function enqueueFrameGenerationJob(payload: FrameGenerationJob) {
@@ -28,9 +35,16 @@ export async function enqueueFrameGenerationJob(payload: FrameGenerationJob) {
   }
 
   const suffix = payload.frameId ?? 'all';
-  return frameGenerationQueue.add('generate-frame', payload, {
-    jobId: `frames:${payload.scriptId}:${suffix}`
-  });
+  try {
+    return await frameGenerationQueue.add('generate-frame', payload, {
+      jobId: `frames:${payload.scriptId}:${suffix}`
+    });
+  } catch (error) {
+    if (isDuplicateJobError(error)) {
+      return null;
+    }
+    throw error;
+  }
 }
 
 export async function enqueueVideoAssemblyJob(payload: VideoAssemblyJob) {
@@ -38,9 +52,16 @@ export async function enqueueVideoAssemblyJob(payload: VideoAssemblyJob) {
     return null;
   }
 
-  return videoAssemblyQueue.add('assemble-video', payload, {
-    jobId: `video:${payload.scriptId}`
-  });
+  try {
+    return await videoAssemblyQueue.add('assemble-video', payload, {
+      jobId: `video:${payload.scriptId}`
+    });
+  } catch (error) {
+    if (isDuplicateJobError(error)) {
+      return null;
+    }
+    throw error;
+  }
 }
 
 export async function enqueueTikTokPublicationJob(payload: TikTokPublicationJob) {
@@ -48,7 +69,22 @@ export async function enqueueTikTokPublicationJob(payload: TikTokPublicationJob)
     return null;
   }
 
-  return tiktokPublicationQueue.add('publish-tiktok', payload, {
-    jobId: `publication:${payload.publicationId}`
-  });
+  try {
+    return await tiktokPublicationQueue.add('publish-tiktok', payload, {
+      jobId: `publication:${payload.publicationId}`
+    });
+  } catch (error) {
+    if (isDuplicateJobError(error)) {
+      return null;
+    }
+    throw error;
+  }
+}
+
+function isDuplicateJobError(error: unknown) {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+
+  return /job.+already/i.test(error.message);
 }

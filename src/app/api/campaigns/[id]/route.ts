@@ -30,6 +30,10 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     const rawPayload = {
       nomeProduto: formData.get('nomeProduto') || undefined,
       tipoProduto: formData.get('tipoProduto') || undefined,
+      gerarImagemBaseNanoBanana: formData.has('gerarImagemBaseNanoBanana')
+        ? parseCheckboxValue(formData.get('gerarImagemBaseNanoBanana'))
+        : undefined,
+      gerarRoteiroComIa: formData.has('gerarRoteiroComIa') ? parseCheckboxValue(formData.get('gerarRoteiroComIa')) : undefined,
       descricaoProduto: formData.get('descricaoProduto') || undefined,
       idioma: formData.get('idioma') || undefined,
       ctaPreferido: formData.get('ctaPreferido') || undefined,
@@ -57,4 +61,21 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     const campaign = await campaignService.updateCampaign(user.id, id, payload, imageInput);
     return successResponse(campaign);
   });
+}
+
+export async function DELETE(_request: Request, context: { params: Promise<{ id: string }> }) {
+  return withRouteErrorHandling(async () => {
+    const user = await requireAuthenticatedUser();
+    const { id } = await context.params;
+    const result = await campaignService.deleteCampaign(user.id, id);
+    return successResponse(result);
+  });
+}
+
+function parseCheckboxValue(value: FormDataEntryValue | null) {
+  if (typeof value !== 'string') {
+    return false;
+  }
+
+  return ['on', 'true', '1', 'yes'].includes(value.toLowerCase());
 }

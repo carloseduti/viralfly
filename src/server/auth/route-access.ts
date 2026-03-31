@@ -3,7 +3,13 @@ const PRIVATE_PREFIXES = [
   '/campaigns',
   '/scripts',
   '/videos',
-  '/publications'
+  '/publications',
+  '/api/campaigns',
+  '/api/scripts',
+  '/api/frames',
+  '/api/videos',
+  '/api/publications',
+  '/api/auth/logout'
 ];
 
 export function isPrivatePath(pathname: string) {

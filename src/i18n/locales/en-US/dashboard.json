@@ -1,0 +1,42 @@
+{
+  "title": "Dashboard",
+  "lifetimeOutput": "Lifetime Output",
+  "thisMonth": "+{{percent}}% this month",
+  "resourceAllocation": "Resource Allocation",
+  "gpu": "GPU",
+  "cloudStorage": "Cloud Storage",
+  "activePipelines": "Active Pipelines",
+  "quickCommands": "Quick Commands",
+  "recentProducts": "Recent Products",
+  "recentAutomations": "Recent Automations",
+  "createProduct": "Create new product",
+  "viewAllProducts": "View all products",
+  "noProducts": "No products created yet.",
+  "metrics": {
+    "products": "Products",
+    "scripts": "Scripts",
+    "frames": "Frames",
+    "videos": "Videos",
+    "publications": "Publications"
+  },
+  "operationPanel": "Operations Panel",
+  "heroTitle": "Generate dynamic ads from product images",
+  "heroDescription": "Pipeline: product image -> Nano Banana base image -> master script -> 3 Veo frames -> assembly -> publication.",
+  "pipelineOrder": "Required order",
+  "steps": {
+    "upload": "Upload product image",
+    "baseImage": "Generate advertising base image",
+    "script": "Generate master script",
+    "frames": "Generate consistent frames",
+    "video": "Assemble video",
+    "publish": "Publish"
+  },
+  "viewAll": "View full list",
+  "createdAt": "Created on {{date}}",
+  "automationCredits": "Automation Credits",
+  "remaining": "{{count}} remaining",
+  "used": "{{percent}}% used",
+  "efficiency": "Efficiency",
+  "videosRendered": "Videos Rendered",
+  "totalReach": "Total Reach"
+}

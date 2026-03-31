@@ -20,6 +20,10 @@ export async function POST(request: Request) {
     const payload = createCampaignSchema.parse({
       nomeProduto: formData.get('nomeProduto'),
       tipoProduto: formData.get('tipoProduto'),
+      gerarImagemBaseNanoBanana: formData.has('gerarImagemBaseNanoBanana')
+        ? parseCheckboxValue(formData.get('gerarImagemBaseNanoBanana'))
+        : undefined,
+      gerarRoteiroComIa: formData.has('gerarRoteiroComIa') ? parseCheckboxValue(formData.get('gerarRoteiroComIa')) : undefined,
       descricaoProduto: formData.get('descricaoProduto') || undefined,
       idioma: formData.get('idioma') || undefined,
       ctaPreferido: formData.get('ctaPreferido') || undefined,
@@ -49,4 +53,12 @@ export async function GET() {
     const campaigns = await campaignService.listCampaigns(user.id);
     return successResponse(campaigns);
   });
+}
+
+function parseCheckboxValue(value: FormDataEntryValue | null) {
+  if (typeof value !== 'string') {
+    return false;
+  }
+
+  return ['on', 'true', '1', 'yes'].includes(value.toLowerCase());
 }

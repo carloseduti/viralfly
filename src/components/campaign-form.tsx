@@ -2,13 +2,17 @@
 
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from 'react-i18next';
 
+import { DEFAULT_PRODUCT_TYPE, PRODUCT_TYPE_OPTIONS } from '@/domain/product-types';
 import { showToast } from '@/utils/toast';
 
 type CampaignFormInitialValues = {
   id?: string;
   nomeProduto?: string;
   tipoProduto?: string;
+  gerarImagemBaseNanoBanana?: boolean;
+  gerarRoteiroComIa?: boolean;
   descricaoProduto?: string;
   idioma?: string;
   ctaPreferido?: string;
@@ -27,17 +31,17 @@ type CampaignFormProps = {
 export function CampaignForm({ mode = 'create', initialValues }: CampaignFormProps) {
   const [loading, setLoading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(initialValues?.imagePublicUrl ?? null);
+  const [nanoBananaEnabled, setNanoBananaEnabled] = useState(initialValues?.gerarImagemBaseNanoBanana ?? true);
+  const [scriptAiEnabled, setScriptAiEnabled] = useState(initialValues?.gerarRoteiroComIa ?? true);
   const router = useRouter();
+  const { t } = useTranslation('product');
 
   const isEdit = mode === 'edit';
-  const title = isEdit ? 'Editar produto' : 'Novo produto';
+  const title = isEdit ? t('form.editTitle') : t('form.createTitle');
 
   const subtitle = useMemo(
-    () =>
-      isEdit
-        ? 'Atualize dados e imagem de referencia sem quebrar o pipeline atual.'
-        : 'Cadastre nome, tipo e imagem para gerar anuncios dinamicos mantendo a identidade visual do produto.',
-    [isEdit]
+    () => (isEdit ? t('form.editSubtitle') : t('form.createSubtitle')),
+    [isEdit, t]
   );
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -49,10 +53,7 @@ export function CampaignForm({ mode = 'create', initialValues }: CampaignFormPro
     const imageFile = formData.get('image');
 
     if (!isEdit && !(imageFile instanceof File && imageFile.size > 0)) {
-      showToast({
-        type: 'error',
-        message: 'Imagem do produto e obrigatoria para gerar os frames'
-      });
+      showToast({ type: 'error', message: t('form.imageError') });
       setLoading(false);
       return;
     }
@@ -60,25 +61,27 @@ export function CampaignForm({ mode = 'create', initialValues }: CampaignFormPro
     const endpoint = isEdit ? `/api/campaigns/${initialValues?.id}` : '/api/campaigns';
     const method = isEdit ? 'PATCH' : 'POST';
 
-    const response = await fetch(endpoint, {
-      method,
-      body: formData
-    });
+    const response = await fetch(endpoint, { method, body: formData });
 
     if (!response.ok) {
       const data = await response.json().catch(() => null);
-      showToast({
-        type: 'error',
-        message: data?.error?.message ?? 'Falha ao salvar produto'
-      });
+      showToast({ type: 'error', message: data?.error?.message ?? t('form.saveError') });
       setLoading(false);
       return;
     }
 
     const data = await response.json();
+    if (!isEdit) {
+      await fetch(`/api/campaigns/${data.data.id}/pipeline/start`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ autoStart: true })
+      }).catch(() => null);
+    }
+
     showToast({
       type: 'success',
-      message: isEdit ? 'Produto atualizado com sucesso' : 'Produto criado com sucesso'
+      message: isEdit ? t('form.editSuccess') : t('form.createSuccess')
     });
     router.push(`/campaigns/${data.data.id}`);
     router.refresh();
@@ -86,117 +89,217 @@ export function CampaignForm({ mode = 'create', initialValues }: CampaignFormPro
 
   function handleImageChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
-    if (!file) {
-      return;
-    }
-
-    const url = URL.createObjectURL(file);
-    setPreviewUrl(url);
+    if (!file) return;
+    setPreviewUrl(URL.createObjectURL(file));
   }
 
   return (
-    <form className="card mx-auto max-w-5xl space-y-5" onSubmit={onSubmit}>
-      <div className="space-y-1">
-        <p className="badge-soft">Cadastro de produto</p>
-        <h1 className="text-2xl font-semibold">{title}</h1>
-        <p className="text-sm text-slate-600">{subtitle}</p>
+    <form className="mx-auto max-w-5xl space-y-6" onSubmit={onSubmit}>
+      {/* Header */}
+      <div>
+        <h1 className="font-heading text-2xl font-bold text-on-surface">{title}</h1>
+        <p className="mt-1 text-sm text-on-surface-variant">{subtitle}</p>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-        <section className="space-y-3">
-          <label className="block text-sm font-medium">
-            Nome do produto
-            <input className="input mt-1" name="nomeProduto" defaultValue={initialValues?.nomeProduto} required />
-          </label>
+      <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+        {/* Left Column - Form Fields */}
+        <div className="space-y-6">
+          {/* Product Information */}
+          <div className="card space-y-4">
+            <h2 className="flex items-center gap-2 text-sm font-semibold text-on-surface">
+              <span className="material-symbols-outlined text-primary" style={{ fontSize: '1.125rem' }}>info</span>
+              {t('form.productName')}
+            </h2>
 
-          <label className="block text-sm font-medium">
-            Tipo do produto
-            <input className="input mt-1" name="tipoProduto" defaultValue={initialValues?.tipoProduto} required />
-          </label>
-
-          <label className="block text-sm font-medium">
-            Descricao comercial
-            <textarea
-              className="input mt-1 min-h-24"
-              name="descricaoProduto"
-              defaultValue={initialValues?.descricaoProduto}
-              placeholder="Descreva o beneficio principal para usar no roteiro."
-            />
-          </label>
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            <label className="block text-sm font-medium">
-              CTA preferido
-              <input className="input mt-1" name="ctaPreferido" defaultValue={initialValues?.ctaPreferido ?? 'Compre agora'} />
+            <label className="block text-sm font-medium text-on-surface-variant">
+              {t('form.productName')}
+              <input className="input mt-1.5" name="nomeProduto" defaultValue={initialValues?.nomeProduto} required />
             </label>
 
-            <label className="block text-sm font-medium">
-              Estilo visual
-              <input className="input mt-1" name="estiloVisual" defaultValue={initialValues?.estiloVisual ?? 'UGC comercial'} />
-            </label>
-          </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="block text-sm font-medium text-on-surface-variant">
+                {t('form.price')}
+                <input className="input mt-1.5" name="valor" placeholder="R$ 0,00" />
+              </label>
 
-          <div className="grid gap-3 sm:grid-cols-2">
-            <label className="block text-sm font-medium">
-              Tom da campanha
-              <input className="input mt-1" name="campaignTone" defaultValue={initialValues?.campaignTone ?? 'Persuasivo direto'} />
-            </label>
+              <label className="block text-sm font-medium text-on-surface-variant">
+                {t('form.productType')}
+                <select
+                  className="input mt-1.5"
+                  name="tipoProduto"
+                  defaultValue={initialValues?.tipoProduto ?? DEFAULT_PRODUCT_TYPE}
+                  required
+                >
+                  {PRODUCT_TYPE_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
 
-            <label className="block text-sm font-medium">
-              Direcao das cenas
-              <input
-                className="input mt-1"
-                name="sceneDirection"
-                defaultValue={initialValues?.sceneDirection ?? 'Narrativa comercial unica do inicio ao fim'}
+            <label className="block text-sm font-medium text-on-surface-variant">
+              {t('form.description')}
+              <textarea
+                className="input mt-1.5 min-h-24"
+                name="descricaoProduto"
+                defaultValue={initialValues?.descricaoProduto}
+                placeholder={t('form.descriptionPlaceholder')}
               />
             </label>
           </div>
 
-          <label className="block text-sm font-medium">
-            Idioma
-            <input className="input mt-1" name="idioma" defaultValue={initialValues?.idioma ?? 'pt-BR'} />
-          </label>
-        </section>
+          {/* Campaign Configuration */}
+          <div className="card space-y-4">
+            <h2 className="flex items-center gap-2 text-sm font-semibold text-on-surface">
+              <span className="material-symbols-outlined text-primary" style={{ fontSize: '1.125rem' }}>tune</span>
+              {t('form.campaignTone')}
+            </h2>
 
-        <section className="card-soft space-y-3 lg:sticky lg:top-24 lg:self-start">
-          <p className="text-sm font-semibold">Imagem de referencia do produto</p>
-          <p className="text-xs text-slate-600">Obrigatoria para gerar a imagem base publicitaria antes do roteiro e dos frames.</p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="block text-sm font-medium text-on-surface-variant">
+                {t('form.cta')}
+                <input className="input mt-1.5" name="ctaPreferido" defaultValue={initialValues?.ctaPreferido ?? 'Compre agora'} />
+              </label>
 
-          <label className="block text-sm font-medium">
-            Upload da imagem
-            <input className="input mt-1" type="file" name="image" accept="image/png,image/jpeg,image/webp" onChange={handleImageChange} />
-          </label>
+              <label className="block text-sm font-medium text-on-surface-variant">
+                {t('form.language')}
+                <input className="input mt-1.5" name="idioma" defaultValue={initialValues?.idioma ?? 'pt-BR'} />
+              </label>
+            </div>
 
-          <div className="media-frame aspect-[4/5] w-full">
-            {previewUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={previewUrl} alt="Preview do produto" className="h-full max-h-[300px] w-full object-cover object-center" />
-            ) : (
-              <div className="flex h-full items-center justify-center px-4 text-center text-sm text-slate-500">
-                Nenhuma imagem enviada ainda.
-              </div>
-            )}
+            <label className="block text-sm font-medium text-on-surface-variant">
+              {t('form.campaignTone')}
+              <input className="input mt-1.5" name="campaignTone" defaultValue={initialValues?.campaignTone ?? 'Persuasivo direto'} />
+            </label>
           </div>
 
-          {initialValues?.baseImagePublicUrl ? (
-            <div className="space-y-2">
-              <p className="text-xs font-semibold text-slate-600">Imagem base publicitaria atual</p>
-              <div className="media-frame aspect-[4/5] w-full">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={initialValues.baseImagePublicUrl}
-                  alt="Imagem base publicitaria"
-                  className="h-full max-h-[300px] w-full object-cover object-center"
+          {/* Creative Direction */}
+          <div className="card space-y-4">
+            <h2 className="flex items-center gap-2 text-sm font-semibold text-on-surface">
+              <span className="material-symbols-outlined text-primary" style={{ fontSize: '1.125rem' }}>palette</span>
+              {t('form.visualStyle')}
+            </h2>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="block text-sm font-medium text-on-surface-variant">
+                {t('form.visualStyle')}
+                <input className="input mt-1.5" name="estiloVisual" defaultValue={initialValues?.estiloVisual ?? 'UGC comercial'} />
+              </label>
+
+              <label className="block text-sm font-medium text-on-surface-variant">
+                {t('form.sceneDirection')}
+                <input
+                  className="input mt-1.5"
+                  name="sceneDirection"
+                  defaultValue={initialValues?.sceneDirection ?? 'Narrativa comercial unica do inicio ao fim'}
                 />
-              </div>
+              </label>
             </div>
-          ) : null}
-        </section>
+          </div>
+
+          {/* AI Automation */}
+          <div className="card space-y-4">
+            <h2 className="flex items-center gap-2 text-sm font-semibold text-on-surface">
+              <span className="material-symbols-outlined text-primary" style={{ fontSize: '1.125rem' }}>auto_awesome</span>
+              {t('form.automation')}
+            </h2>
+
+            <label className="flex items-center justify-between gap-3">
+              <span className="text-sm text-on-surface-variant">{t('form.generateNanoBanana')}</span>
+              <button
+                type="button"
+                className="toggle-switch"
+                data-active={nanoBananaEnabled}
+                onClick={() => setNanoBananaEnabled(!nanoBananaEnabled)}
+              >
+                <span className="toggle-switch-dot" />
+              </button>
+              <input type="hidden" name="gerarImagemBaseNanoBanana" value={nanoBananaEnabled ? 'on' : ''} />
+            </label>
+
+            <label className="flex items-center justify-between gap-3">
+              <span className="text-sm text-on-surface-variant">{t('form.generateScript')}</span>
+              <button
+                type="button"
+                className="toggle-switch"
+                data-active={scriptAiEnabled}
+                onClick={() => setScriptAiEnabled(!scriptAiEnabled)}
+              >
+                <span className="toggle-switch-dot" />
+              </button>
+              <input type="hidden" name="gerarRoteiroComIa" value={scriptAiEnabled ? 'on' : ''} />
+            </label>
+          </div>
+
+          {/* Pro Tip */}
+          <div className="glass-card flex items-start gap-3">
+            <span className="material-symbols-outlined text-tertiary" style={{ fontSize: '1.25rem' }}>lightbulb</span>
+            <div>
+              <p className="text-sm font-semibold text-on-surface">{t('form.proTip')}</p>
+              <p className="mt-1 text-sm text-on-surface-variant">{t('form.proTipText')}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column - Image Upload */}
+        <div className="lg:sticky lg:top-24 lg:self-start">
+          <div className="card space-y-4">
+            <h2 className="text-sm font-semibold text-on-surface">{t('form.imageUpload')}</h2>
+            <p className="text-xs text-on-surface-variant">{t('form.imageRequired')}</p>
+
+            <label className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-outline-variant/30 bg-surface-container-lowest p-8 text-center transition hover:border-primary/30">
+              <span className="material-symbols-outlined text-on-surface-variant" style={{ fontSize: '2.5rem' }}>
+                cloud_upload
+              </span>
+              <p className="mt-2 text-sm font-medium text-on-surface-variant">{t('form.imageUploadHint')}</p>
+              <p className="mt-1 text-xs text-outline">{t('form.imageFormats')}</p>
+              <input
+                className="hidden"
+                type="file"
+                name="image"
+                accept="image/png,image/jpeg,image/webp"
+                onChange={handleImageChange}
+              />
+            </label>
+
+            <div className="media-frame aspect-[4/5] w-full">
+              {previewUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={previewUrl} alt="Preview" className="h-full max-h-[300px] w-full object-cover object-center" />
+              ) : (
+                <div className="flex h-full items-center justify-center px-4 text-center text-sm text-on-surface-variant">
+                  {t('form.noImage')}
+                </div>
+              )}
+            </div>
+
+            {initialValues?.baseImagePublicUrl ? (
+              <div className="space-y-2">
+                <p className="text-xs font-semibold text-on-surface-variant">{t('form.baseImage')}</p>
+                <div className="media-frame aspect-[4/5] w-full">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={initialValues.baseImagePublicUrl}
+                    alt="Base image"
+                    className="h-full max-h-[300px] w-full object-cover object-center"
+                  />
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-end gap-2">
-        <button className="btn w-full sm:w-auto" type="submit" disabled={loading}>
-          {loading ? 'Salvando...' : isEdit ? 'Salvar alteracoes' : 'Criar produto'}
+      {/* Actions */}
+      <div className="flex flex-wrap items-center justify-end gap-3">
+        <button type="button" className="btn-secondary" onClick={() => router.back()}>
+          {t('form.cancel')}
+        </button>
+        <button className="btn" type="submit" disabled={loading}>
+          <span className="material-symbols-outlined" style={{ fontSize: '1.125rem' }}>arrow_forward</span>
+          {loading ? t('form.saving') : isEdit ? t('form.saveChanges') : t('form.save')}
         </button>
       </div>
     </form>

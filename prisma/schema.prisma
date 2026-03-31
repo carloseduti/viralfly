@@ -60,6 +60,8 @@ model Campaign {
   userId          String         @db.Uuid
   nomeProduto     String
   tipoProduto     String         @default("geral")
+  gerarImagemBaseNanoBanana Boolean @default(true)
+  gerarRoteiroComIa Boolean   @default(true)
   descricaoProduto String
   nicho           String
   idioma          String

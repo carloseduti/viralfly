@@ -39,6 +39,14 @@ export class BaseImageService {
       return campaign;
     }
 
+    if (!forceRegenerate && campaign.baseImageStatus === FrameStatus.PROCESSING && campaign.baseImageExternalJobId) {
+      return campaign;
+    }
+
+    if (!forceRegenerate && campaign.baseImageStatus === FrameStatus.FAILED) {
+      throw new AppError('A etapa de imagem base falhou. Use retry manual para tentar novamente.', 409);
+    }
+
     await this.campaignRepository.updateByIdAndUser(campaignId, userId, {
       baseImageStatus: FrameStatus.PROCESSING,
       baseImageError: null
@@ -180,7 +188,13 @@ export class BaseImageService {
 
     if (isSuccess && resultUrl) {
       await this.persistBaseImageResult(campaign.id, campaign.userId, resultUrl, taskId);
-      return { acknowledged: true, updated: true, status: 'GENERATED' as const };
+      return {
+        acknowledged: true,
+        updated: true,
+        status: 'GENERATED' as const,
+        campaignId: campaign.id,
+        userId: campaign.userId
+      };
     }
 
     const errorMessage = payload.data?.failMsg ?? payload.msg ?? 'Falha na geracao da imagem base';
@@ -189,7 +203,13 @@ export class BaseImageService {
       baseImageError: errorMessage
     });
 
-    return { acknowledged: true, updated: true, status: 'FAILED' as const };
+    return {
+      acknowledged: true,
+      updated: true,
+      status: 'FAILED' as const,
+      campaignId: campaign.id,
+      userId: campaign.userId
+    };
   }
 
   private async persistBaseImageResult(campaignId: string, userId: string, outputImageUrl: string, taskId: string) {

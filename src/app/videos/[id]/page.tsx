@@ -1,6 +1,7 @@
-﻿import Link from 'next/link';
+import Link from 'next/link';
 
 import { ActionButton } from '@/components/action-button';
+import { getProductTypeLabel } from '@/domain/product-types';
 import { StatusBadge } from '@/components/status-badge';
 import { requirePageAuthenticatedUser } from '@/server/auth/require-authenticated-user';
 import { VideoAssemblyService } from '@/server/modules/videos/video-assembly.service';
@@ -18,7 +19,7 @@ export default async function VideoDetailPage({ params }: { params: Promise<{ id
         <div>
           <p className="badge-soft">Video final</p>
           <h1 className="mt-2 text-2xl font-semibold">Preview do anuncio montado</h1>
-          <p className="mt-1 text-sm text-slate-600">Montagem dos 3 frames com referencia visual fixa do produto.</p>
+          <p className="mt-1 text-sm text-on-surface-variant">Montagem dos 3 frames com referencia visual fixa do produto.</p>
         </div>
         <StatusBadge status={video.statusMontagem} />
       </section>
@@ -32,7 +33,7 @@ export default async function VideoDetailPage({ params }: { params: Promise<{ id
                 <source src={video.publicUrl} type="video/mp4" />
               </video>
             ) : (
-              <div className="flex h-full items-center justify-center text-sm text-slate-400">Video ainda nao disponivel.</div>
+              <div className="flex h-full items-center justify-center text-sm text-on-surface-variant">Video ainda nao disponivel.</div>
             )}
           </div>
           <div className="action-grid">
@@ -59,17 +60,17 @@ export default async function VideoDetailPage({ params }: { params: Promise<{ id
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={video.script.campaign.baseImagePublicUrl} alt={video.script.campaign.nomeProduto} className="h-full w-full object-cover" />
               ) : (
-                <div className="flex h-full items-center justify-center text-xs text-slate-500">Sem imagem</div>
+                <div className="flex h-full items-center justify-center text-xs text-on-surface-variant">Sem imagem</div>
               )}
             </div>
             <p className="mt-3 text-sm font-medium">{video.script.campaign.nomeProduto}</p>
-            <p className="text-xs text-slate-600">{video.script.campaign.tipoProduto}</p>
-            <p className="text-xs text-slate-600">Tom: {video.script.campaignTone ?? video.script.campaign.campaignTone}</p>
+            <p className="text-xs text-on-surface-variant">{getProductTypeLabel(video.script.campaign.tipoProduto)}</p>
+            <p className="text-xs text-on-surface-variant">Tom: {video.script.campaignTone ?? video.script.campaign.campaignTone}</p>
           </div>
 
-          <div className="card space-y-2 text-sm text-slate-700">
+          <div className="card space-y-2 text-sm text-on-surface-variant">
             <h2 className="section-title">Status tecnico</h2>
-            <p>DuraÃ§Ã£o estimada: {video.duracaoTotal ?? 0}s</p>
+            <p>Duração estimada: {video.duracaoTotal ?? 0}s</p>
             <p>Public URL: {video.publicUrl ?? 'indisponivel'}</p>
             <p>Thumbnail: {video.thumbnailUrl ?? 'indisponivel'}</p>
           </div>
@@ -90,5 +91,6 @@ export default async function VideoDetailPage({ params }: { params: Promise<{ id
     </div>
   );
 }
+
 
 
